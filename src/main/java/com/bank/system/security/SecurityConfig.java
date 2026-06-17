@@ -1,5 +1,6 @@
 package com.bank.system.security;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
@@ -22,6 +23,12 @@ import java.util.Arrays;
 @EnableWebSecurity
 public class SecurityConfig {
 
+    @Value("${spring.security.user.name:user}")
+    private String securityUsername;
+
+    @Value("${spring.security.user.password:BaluBank2026}")
+    private String securityPassword;
+
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
@@ -41,8 +48,8 @@ public class SecurityConfig {
     public UserDetailsService userDetailsService() {
         @SuppressWarnings("deprecation")
         UserDetails user = User.withDefaultPasswordEncoder()
-                .username("user")
-                .password("BaluBank2026")
+                .username(securityUsername)
+                .password(securityPassword)
                 .roles("USER")
                 .build();
         return new InMemoryUserDetailsManager(user);
@@ -52,8 +59,8 @@ public class SecurityConfig {
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
 
-        // Using Arrays.asList to guarantee 100% compiler compatibility across all Java runtimes
-        configuration.setAllowedOrigins(Arrays.asList("http://localhost:5173", "http://localhost:3000"));
+        // setAllowedOriginPatterns allows dynamic domains (like Vercel production URLs) to work with credentials
+        configuration.setAllowedOriginPatterns(Arrays.asList("*"));
         configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
         configuration.setAllowedHeaders(Arrays.asList("Authorization", "Content-Type", "Cache-Control"));
         configuration.setExposedHeaders(Arrays.asList("Authorization"));
